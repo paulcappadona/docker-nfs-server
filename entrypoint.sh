@@ -273,7 +273,10 @@ is_kernel_module_loaded() {
 
 is_granted_linux_capability() {
 
-  if capsh --print | grep -Eq "^Current: = .*,?${1}(,|$)"; then
+  CAPS=$(capsh --print)
+  log "$CAPS"
+
+  if capsh --print | grep -Eq "^Current: .*,?${1}(,|$)"; then
     return 0
   fi
 
@@ -300,7 +303,9 @@ assert_kernel_mod() {
     return
   fi
 
-  if [[ ! -d /lib/modules ]] || ! is_granted_linux_capability 'sys_module'; then
+  if [[ ! -d /lib/modules ]] || ! is_granted_linux_capability 'cap_sys_module'; then
+    MLIST=$(ls -l /lib)
+    echo "$MLIST"
     bail "$module module is not loaded in the Docker host's kernel (try: modprobe $module)"
   fi
 
